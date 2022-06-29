@@ -1,0 +1,7 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ggilbert/Documents/ptroger'
+mkdir -p objs
+c++ -Wall -Wextra -Werror -std=c++98 -pedantic -D STD=0 -Icontainers_hpp -c -o objs/main_42.o main_42.cpp
+c++ -Wall -Wextra -Werror -std=c++98 -pedantic objs/main_42.o -o containerz 
+make: Leaving directory '/home/ggilbert/Documents/ptroger'
+ 

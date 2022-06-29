@@ -70,6 +70,12 @@ class MapIterator
 		pointer			operator->( void ) { return (&(this->_it->data)); };
 		pointer			operator->( void ) const { return (&(this->_it->data)); };
 		MapIterator& 	operator++( void ) {
+			std::cout << "youpi" << std::endl;
+			if (this->_it == _TNULL)
+			{
+				std::cout << "youpi" << std::endl;
+				return (*this);
+			}
 			if (_out)
 			{
 				if (this->_offset == -1)
@@ -91,6 +97,8 @@ class MapIterator
 					tmp_it = tmp_it->right;
 					while (tmp_it->left != _TNULL)
 					{
+						std::cout << "youpi" << std::endl;
+
 						tmp_it = tmp_it->left;
 					}
 					_it = tmp_it;

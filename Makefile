@@ -1,6 +1,6 @@
 NAME= containerz
 
-CXX= clang++
+CXX= c++
 
 CXXFLAGS= -Wall -Wextra -Werror -std=c++98 -pedantic
 

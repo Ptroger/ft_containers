@@ -30,7 +30,7 @@ namespace ft {
 		typedef typename ft::RedBlackTree<K, V, key_compare>::alloc						BST_allocator_type;
 		typedef typename ft::RedBlackTree<K, V, key_compare>::node_pointer				BST_pointer;
 		typedef typename std::allocator< RedBlackTree< K, V, key_compare > >			Tree_Alloc;
-		typedef typename Tree_Alloc::pointer											Tree_pointer;
+		typedef typename ft::RedBlackTree<K, V, key_compare>							Tree_pointer;
 
         private:
 		class value_compare
@@ -71,33 +71,25 @@ namespace ft {
 
 		~map() {
 			destroy_dummy();
-			_tree.destroy(_bst);
-			_tree.deallocate(_bst, 1);
 		}
 
-		void	printTree(){if (_bst) { _bst->printTree();}}
+		void	printTree(){if (_size > 0) { _bst.printTree();}}
         ft::pair<iterator,bool> insert (const value_type& val){
 			ft::pair<BST_pointer, bool>	ret;
 			ft::pair<iterator, bool> 			convert;
-
-            if (!_bst)
-			{
-				_bst = _tree.allocate(1);
-				_tree.construct(_bst);
-			}
 				
-			ret = _bst->insert(val);
+			ret = _bst.insert(val);
 
             if (ret.second)	
 			{
 				convert.second = true;
-				convert.first = iterator(ret.first, _dummy_end, 0, _bst->getTnull());
+				convert.first = iterator(ret.first, _dummy_end, 0, _bst.getTnull());
 				_size++;
 			}
 			else
 			{
 				convert.second = false;
-				convert.first = iterator(ret.first, _dummy_end, 0, _bst->getTnull());
+				convert.first = iterator(ret.first, _dummy_end, 0, _bst.getTnull());
 			}
 			return (convert);
         }
@@ -116,12 +108,12 @@ namespace ft {
 		}
 		
 		explicit map (const key_compare& comp = key_compare(),
-				const allocator_type& alloc = allocator_type()) : _compare(comp), _alloc(alloc), _size(0), _bst(NULL), _dummy_end(NULL) { init_dummy(); }
+				const allocator_type& alloc = allocator_type()) : _compare(comp), _alloc(alloc), _size(0), _bst(), _dummy_end(NULL) { init_dummy(); }
 		
-		map (const map& x) : _compare(x._compare), _alloc(x._alloc), _size(x._size), _bst(NULL), _dummy_end(NULL) {
+		map (const map& x) : _compare(x._compare), _alloc(x._alloc), _size(x._size), _bst(), _dummy_end(NULL) {
 			init_dummy();
 			if (x._bst)
-				_bst = x._bst->copy_this();
+				_bst = x._bst.copy_this();
 		 }
 
 		template <class InputIterator>
@@ -137,8 +129,7 @@ namespace ft {
 			{
 				_compare = x._compare;
 				clear();
-				if (x._bst)
-					_bst = x._bst->copy_this();
+				insert(x.begin(), x.end());
 				_size = x._size;
 				_bst_alloc = x._bst_alloc;
 			}
@@ -146,10 +137,10 @@ namespace ft {
 		}
 		void erase(iterator position)
 		{
-			if (!_bst)
+			if (_size <= 0)
 				return ;
 			else {
-				if (_bst->erase(position.base()) != 0)
+				if (_bst.erase(position.base()) != 0)
 					_size--;
 				
 			}
@@ -163,11 +154,11 @@ namespace ft {
 
 		size_type	erase(const key_type & k)
 		{
-			if (!_bst)
+			if (_size <= 0)
 				return (0);
 			else
 			{
-				if (_bst->erase(_bst->fbk(k)) == 1)
+				if (_bst.erase(_bst.fbk(k)) == 1)
 				{
 					_size--;
 					return (1);
@@ -181,11 +172,9 @@ namespace ft {
 		}
 
 		void clear( void ) {
-			if (_bst)
+			if (_size > 0)
 			{
-				_tree.destroy(_bst);
-				_tree.deallocate(_bst, 1);
-				_bst = NULL;
+				_bst.destroy();
 				_size = 0;
 			}
 		};
@@ -193,64 +182,64 @@ namespace ft {
 		//ITERATORS//
 	public:
 		iterator begin( void ) {
-			if (_bst)
-				return (iterator(_bst->find_start(), _dummy_end, 0, _bst->getTnull()));
+			if (_size > 0)
+				return (iterator(_bst.find_start(), _dummy_end, 0, _bst.getTnull()));
 			else
-				return (iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		const_iterator begin() const {
-			if (_bst)
-				return (const_iterator(_bst->find_start(), _dummy_end, 0, _bst->getTnull()));
+			if (_size > 0)
+				return (const_iterator(_bst.find_start(), _dummy_end, 0, _bst.getTnull()));
 			else
-				return (const_iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (const_iterator(_dummy_end, _dummy_end, 1, NULL));
 		};
 
 
 		iterator end( void ){
-			if (_bst)
-				return (iterator(_bst->find_end(), _dummy_end, 1, _bst->getTnull()));
+			if (_size > 0)
+				return (iterator(_bst.find_end(), _dummy_end, 1, _bst.getTnull()));
 			else
-				return (iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		const_iterator end( void ) const {
-			if (_bst)
-				return (const_iterator(_bst->find_end(), _dummy_end, 1, _bst->getTnull()));
+			if (_size > 0)
+				return (const_iterator(_bst.find_end(), _dummy_end, 1, _bst.getTnull()));
 			else
-				return (const_iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (const_iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		iterator find (const key_type& k){
-			if (_bst)
+			if (_size > 0)
 			{
-				BST_pointer tmp = _bst->fbk(k);
+				BST_pointer tmp = _bst.fbk(k);
 				if (tmp)
-					return (iterator(tmp, _dummy_end, 0, _bst->getTnull()));
+					return (iterator(tmp, _dummy_end, 0, _bst.getTnull()));
 				else
 					return (end());
 			}
 			else
-				return (iterator(_dummy_end, _dummy_end, 1, nullptr));	
+				return (iterator(_dummy_end, _dummy_end, 1, NULL));	
 		}
 
 		const_iterator find (const key_type& k) const{
-			if (_bst)
+			if (_size > 0)
 			{
-				BST_pointer tmp = _bst->fbk(k);
+				BST_pointer tmp = _bst.fbk(k);
 				if (tmp)
-					return (const_iterator(tmp, _dummy_end, 0, _bst->getTnull()));
+					return (const_iterator(tmp, _dummy_end, 0, _bst.getTnull()));
 				else
 					return (end());
 			}
 			else
-				return (const_iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (const_iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		size_type	count( const key_type& k) const{
-			if (_bst)
+			if (_size > 0)
 			{
-				BST_pointer tmp = _bst->fbk(k);
+				BST_pointer tmp = _bst.fbk(k);
 				if (tmp)
 					return 1;
 				else
@@ -262,7 +251,7 @@ namespace ft {
 
 		iterator lower_bound (const key_type& k)
 		{
-			if (_bst)
+			if (_size > 0)
 			{
 				iterator it = begin();
 				iterator it_end = end();
@@ -274,12 +263,12 @@ namespace ft {
 				return (it);
 			}
 			else
-				return (iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		const_iterator lower_bound (const key_type& k) const
 		{
-			if (_bst)
+			if (_size > 0)
 			{
 				const_iterator it = begin();
 				const_iterator it_end = end();
@@ -291,11 +280,11 @@ namespace ft {
 				return (it);
 			}
 			else
-				return (const_iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (const_iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 	
 		iterator upper_bound (const key_type& k){
-			if (_bst)
+			if (_size > 0)
 			{
 				iterator it = begin();
 				iterator it_end = end();
@@ -311,11 +300,11 @@ namespace ft {
 				return (it);
 			}
 			else
-				return (iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		const_iterator upper_bound (const key_type& k) const{
-			if (_bst)
+			if (_size > 0)
 			{
 				const_iterator it = begin();
 				const_iterator it_end = end();
@@ -331,7 +320,7 @@ namespace ft {
 				return (it);
 			}
 			else
-				return (const_iterator(_dummy_end, _dummy_end, 1, nullptr));
+				return (const_iterator(_dummy_end, _dummy_end, 1, NULL));
 		}
 
 		ft::pair<iterator,iterator>             equal_range (const key_type& k){
@@ -358,7 +347,7 @@ namespace ft {
 
 		mapped_type& operator[] (const key_type& k)
 		{
-			return (*((this->insert(ft::make_pair(k, mapped_type()))).first)).second;
+			return (*((insert(ft::make_pair(k, mapped_type()))).first)).second;
 		}
 
 	public:
@@ -366,18 +355,13 @@ namespace ft {
 		size_type		max_size() const { return _bst_alloc.max_size(); }
 		allocator_type	get_allocator( void ) const { return _alloc; }
 		key_compare		key_comp() const { return _compare; }
-		void			swap (map& x) { 
-			size_type 		tmp_size = _size;
-			Tree_pointer 	tmp_bst = _bst;
-			BST_pointer		tmp_dummy = _dummy_end;
+		void			swap (map& x) {
+			size_type	tmp;
 
+			tmp = _size;
 			_size = x._size;
-			_bst = x._bst;
-			_dummy_end = x._dummy_end;
-
-			x._size = tmp_size;
-			x._bst = tmp_bst;
-			x._dummy_end = tmp_dummy;
+			x._size = tmp;
+			_bst.swap(x._bst);
 		};
 		value_compare 	value_comp() const { return value_compare(_compare); };
     };

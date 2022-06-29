@@ -14,15 +14,12 @@ namespace ft{
         Node            *parent;
         int             color;
         Node(pair_type pair) : data(pair){}
-        Node(bool flag, Node *_parent) {
+        Node() {
             data.second = -1;
             color = BLACK;
-            left = nullptr;
-            right = nullptr;
-            if (flag == true)
-                parent = nullptr;
-            else
-                parent = _parent;
+            left = NULL;
+            right = NULL;
+            parent = NULL;
         }
         
     };
@@ -54,30 +51,30 @@ namespace ft{
 
         public:
 
-            node_pointer    fs(node_pointer node)
+            node_pointer    fs(node_pointer node) const
             {
                 if (node->left && node->left != _TNULL)
                     return (fs(node->left));
                 return(node);
             }
 
-            node_pointer    fe(node_pointer node)
+            node_pointer    fe(node_pointer node) const
             {
                 if (node->right && node->right != _TNULL)
                     return (fs(node->right));
                 return(node);
             }
-            node_pointer	find_start( void )
+            node_pointer	find_start( void ) const
 	        {
                 return (fs(_root));
 	        }
 
-            node_pointer    find_end(void)
+            node_pointer    find_end(void) const
             {
                 return (fe(_root));
             }
 
-            node_pointer    find_by_key(K key, node_pointer node)
+            node_pointer    find_by_key(K key, node_pointer node) const
             {
                 if (_compare(key, node->data.first))
 		        {
@@ -96,7 +93,7 @@ namespace ft{
 		        		return NULL;
 		        }
             }
-            node_pointer    fbk(K key)
+            node_pointer    fbk(K key) const
             {
                 return (find_by_key(key, _root));
             }
@@ -119,7 +116,7 @@ namespace ft{
                 return (node);
             }
 
-            pointer	copy_this( void )
+            pointer	copy_this( void ) const
 	        {
 	        	pointer tmp;
 	        	tmp = _tree.allocate(1);
@@ -129,7 +126,8 @@ namespace ft{
 
             void    initializeNULLNode(node_pointer nodd, node_pointer parent)
             {
-                _alloc.construct(nodd, true, parent);
+                Node< ft::pair< const K, V> > Node;
+                _alloc.construct(nodd, Node);
             };
 
             // PREORDER
@@ -179,7 +177,7 @@ namespace ft{
                   y->right->parent = x;
                 }
                 y->parent = x->parent;
-                if (x->parent == nullptr) {
+                if (x->parent == NULL) {
                   this->_root = y;
                 } else if (x == x->parent->right) {
                   x->parent->right = y;
@@ -197,7 +195,7 @@ namespace ft{
                   y->left->parent = x;
                 }
                 y->parent = x->parent;
-                if (x->parent == nullptr) {
+                if (x->parent == NULL) {
                   this->_root = y;
                 } else if (x == x->parent->left) {
                   x->parent->left = y;
@@ -262,13 +260,15 @@ namespace ft{
                 node_pointer    x;
                 node_pointer    y;
 
-                y = nullptr;
+                y = NULL;
                 x = this->_root;
+
                 newNode = _alloc.allocate(1);
                 _alloc.construct(newNode, Node<pair_type>(elem));
                 newNode->right = _TNULL;
                 newNode->left = _TNULL;
                 newNode->color = RED;
+
                 while (x != _TNULL) {
                     y = x;
                     if (_compare(newNode->data.first, x->data.first)) {
@@ -283,30 +283,29 @@ namespace ft{
                        x = x->right;
                     }
                 }
+
                 ret.first = newNode;
                 ret.second = true;
-                if (y != nullptr) {
-                }
                 newNode->parent = y;
-                if (y == nullptr) {
+                if (y == NULL) {
                     _root = newNode;
                 }
                 else if (_compare(newNode->data.first, y->data.first))
                     y->left = newNode;
                 else
                     y->right = newNode;
-                if (newNode->parent == nullptr) {
+                if (newNode->parent == NULL) {
                     newNode->color = BLACK;
                     return (ret);
                 }
-                if (newNode->parent->parent == nullptr)
+                if (newNode->parent->parent == NULL)
                     return (ret);
                 insertFix(newNode);
                 return (ret);
             }
 
             void rbTransplant(node_pointer u, node_pointer v) {
-                if (u->parent == nullptr)
+                if (u->parent == NULL)
                     _root = v;
                 else if (u == u->parent->left)
                     u->parent->left = v;
@@ -445,8 +444,23 @@ namespace ft{
                 }
             }
 
-            node_pointer    getTnull() {
+            node_pointer    getTnull() const 
+            {
                 return (_TNULL);
+            }
+
+            void    swap(RedBlackTree& x) {
+                node_pointer    tmp;
+                node_pointer    tnull;
+
+                tmp = _root;
+                tnull = _TNULL;
+
+                _root = x._root;
+                _TNULL = x._TNULL;
+
+                x._root = tmp;
+                x._TNULL = tnull;
             }
 
             void    dest(node_pointer node) {
@@ -459,18 +473,29 @@ namespace ft{
             }
 
             void    destroy() {
-                dest(_root);
+                if (_root != _TNULL) {
+                    dest(_root);
+                    _root = _TNULL;
+                    }
             }
 
         public:
+            const RedBlackTree&	operator=(const RedBlackTree& x) const{
+                return (x);
+            }
+
             explicit RedBlackTree() : _alloc(alloc()) {
                 _TNULL = _alloc.allocate(1);
-                initializeNULLNode(_TNULL, nullptr);
+                initializeNULLNode(_TNULL, NULL);
                 _root = _TNULL;
             };
 
             RedBlackTree( RedBlackTree<K, V, Compare> const &src) : _root(src._root), _TNULL(src._TNULL), _alloc(src._alloc) {};
-            
+            ~RedBlackTree() {
+                destroy();
+                _alloc.destroy(_TNULL);
+                _alloc.deallocate(_TNULL, 1);
+            };
     };
 }
 
