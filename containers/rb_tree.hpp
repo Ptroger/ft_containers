@@ -124,7 +124,7 @@ namespace ft{
 	        	return tmp;
 	        }
 
-            void    initializeNULLNode(node_pointer nodd, node_pointer parent)
+            void    initializeNULLNode(node_pointer nodd)
             {
                 Node< ft::pair< const K, V> > Node;
                 _alloc.construct(nodd, Node);
@@ -277,6 +277,7 @@ namespace ft{
                     else if (newNode->data.first == x->data.first) {
                         ret.second = false;
                         ret.first = x;
+                        dest(newNode);
                         return (ret);
                     }
                     else {
@@ -430,7 +431,9 @@ namespace ft{
                         indent += "|  ";
                     }
                 }
-                std::string sColor = root->color ? "RED" : "BLACK";
+                std::cout << "ALEEEED" << std::endl;
+                 std::string sColor = root->color ? "RED" : "BLACK";
+                std::cout << "ALEEEED" << std::endl;
                 std::cout << root->data.first << " --- " << root->data.second << "(" << sColor << ")" << std::endl;
                 if (root->left && root->left != _TNULL)
                     printHelper(root->left, indent, false);
@@ -473,10 +476,11 @@ namespace ft{
             }
 
             void    destroy() {
-                if (_root != _TNULL) {
+                if (_root != _TNULL)
+                {
                     dest(_root);
                     _root = _TNULL;
-                    }
+                }
             }
 
         public:
@@ -486,7 +490,7 @@ namespace ft{
 
             explicit RedBlackTree() : _alloc(alloc()) {
                 _TNULL = _alloc.allocate(1);
-                initializeNULLNode(_TNULL, NULL);
+                initializeNULLNode(_TNULL);
                 _root = _TNULL;
             };
 
@@ -495,6 +499,7 @@ namespace ft{
                 destroy();
                 _alloc.destroy(_TNULL);
                 _alloc.deallocate(_TNULL, 1);
+               
             };
     };
 }
